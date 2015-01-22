@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" output="bin/core-app" path="src/core/java-app"/>
+	<classpathentry kind="src" output="bin/core-genserver" path="src/core/java-genserver"/>
+	<classpathentry kind="src" output="bin/matlab" path="src/matlab/java"/>
+	<classpathentry kind="src" output="bin/scilab" path="src/scilab/java"/>
+	<classpathentry kind="src" output="bin/test-core" path="test/core/junit"/>
+	<classpathentry kind="src" output="bin/test-matlab" path="test/matlab/junit"/>
+	<classpathentry kind="src" output="bin/test-scilab" path="test/scilab/junit"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
+	<classpathentry kind="lib" path="src/core/lib/fop-1.0.jar"/>
+	<classpathentry kind="lib" path="src/core/lib/saxon9.jar"/>
+	<classpathentry kind="var" path="MATLAB_ROOT/java/jar/jmi.jar"/>
+	<classpathentry kind="var" path="SCILAB_ROOT/modules/xcos/jar/org.scilab.modules.xcos.jar"/>
+	<classpathentry kind="var" path="SCILAB_ROOT/modules/gui/jar/org.scilab.modules.gui.jar"/>
+	<classpathentry kind="var" path="SCILAB_ROOT/modules/graph/jar/org.scilab.modules.graph.jar"/>
+	<classpathentry kind="var" path="SCILAB_ROOT/thirdparty/jgraphx.jar"/>
+	<classpathentry kind="lib" path="test/lib/junit/junit.jar"/>
+	<classpathentry kind="lib" path="test/lib/ant/ant.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

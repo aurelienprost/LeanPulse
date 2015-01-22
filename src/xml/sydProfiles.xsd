@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.leanpulse.com/schemas/syd/2011/profiles"
+		xmlns:pro="http://www.leanpulse.com/schemas/syd/2011/profiles"
+		elementFormDefault="qualified">
+	<xs:element name="profiles">
+        <xs:annotation>
+        	<xs:documentation>Root element of the profile definition file</xs:documentation></xs:annotation>
+        <xs:complexType>
+			<xs:sequence>
+				<xs:element maxOccurs="unbounded" ref="pro:profile" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="profile">
+        <xs:annotation>
+        	<xs:documentation>Each profile will correspond to one entry in the generation menu of the model.</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+			<xs:sequence>
+				<xs:element maxOccurs="unbounded" ref="pro:render" />
+			</xs:sequence>
+			<xs:attribute name="id" type="xs:string" use="required" >
+				<xs:annotation>
+					<xs:documentation>The profile ID is used internally and when calling the generation by command line. A given ID must be unique amongst profiles.</xs:documentation>
+				</xs:annotation></xs:attribute>
+			<xs:attribute name="name" type="xs:string" use="required" >
+				<xs:annotation>
+					<xs:documentation>The profile name defines the text of the menu entry.</xs:documentation>
+				</xs:annotation></xs:attribute>
+			<xs:attribute name="description" type="xs:string" use="optional" default="" >
+				<xs:annotation>
+					<xs:documentation>The short description of the profile; might be used as tooltip in the UI.</xs:documentation>
+				</xs:annotation></xs:attribute>
+			<xs:attribute name="shortcut" type="xs:string" use="optional" default="" >
+				<xs:annotation>
+					<xs:documentation>String specifying a keyboard shortcut that a user may use to trigger this profile. The string must be of the form 'Ctrl+K', where K is the shortcut key.</xs:documentation>
+				</xs:annotation></xs:attribute>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="render">
+        <xs:annotation>
+        	<xs:documentation>This element defines the rendering parameters of a model to one or several documents.</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+			<xs:choice minOccurs="0" maxOccurs="unbounded">
+				<xs:element ref="pro:render" >
+					<xs:annotation>
+						<xs:documentation>Children render elements are useful in the case of a generation from a model with dependencies (i.e. referencing other models).
+The tree of children render elements enables to alter the way documents are generated depending in their level in the hierarchy.
+Those children elements might be useful even if the "gendep" parameter is set to false in order to compute relative links to external documents.</xs:documentation>
+					</xs:annotation></xs:element>
+				<xs:element ref="pro:param" >
+					<xs:annotation>
+						<xs:documentation>Stylesheet parameters to be passed to the XSLT processor to layout and style the output document.</xs:documentation>
+					</xs:annotation></xs:element>
+			</xs:choice>
+			<xs:attribute name="style" type="xs:string" use="optional" default="default" >
+				<xs:annotation>
+					<xs:documentation>The name of the stylesheet to be used to layout and style the ouput document. The name shouldn't include the extension.</xs:documentation>
+				</xs:annotation></xs:attribute>
+			<xs:attribute name="format" use="required">
+                <xs:annotation>
+                	<xs:documentation>The format of the output document; only pdf is supported for now.</xs:documentation>
+                </xs:annotation>
+                <xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="pdf" />
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:attribute>
+			<xs:attribute name="outdir" type="xs:string" use="required" >
+				<xs:annotation>
+					<xs:documentation>The output directory of the generated document.
+Can be absolute (for example: "C:/Users/LeanPulse/Documents") or relative (example: "../pdf").
+If relative, the directory to which the output directory is relative depends on the "relto" parameter.</xs:documentation>
+				</xs:annotation></xs:attribute>
+			<xs:attribute name="relto" use="optional" default="model">
+                <xs:annotation>
+                	<xs:documentation>To which directory the output directory is relative.
+Can be the model dir, the current dir or the parent output dir.
+If this last option is used by a root render element, the parent output dir will be initialized with the directory of the root model, from where the generation started.</xs:documentation>
+                </xs:annotation>
+                <xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="model" />
+						<xs:enumeration value="curdir" />
+						<xs:enumeration value="parent" />
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:attribute>
+			<xs:attribute name="suffix" type="xs:string" use="optional"	default="" >
+				<xs:annotation>
+					<xs:documentation>The suffix to apply to the model name to compute the output doc name.</xs:documentation>
+				</xs:annotation></xs:attribute>
+			<xs:attribute name="action" use="optional" default="nop">
+                <xs:annotation>
+                	<xs:documentation>The action to perform after the document generation.</xs:documentation>
+                </xs:annotation>
+                <xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="nop" />
+						<xs:enumeration value="open" />
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:attribute>
+			<xs:attribute name="gendep" type="xs:boolean" use="optional" default="false" >
+				<xs:annotation>
+					<xs:documentation>If true, will also generate the dependencies of the model, i.e. the models referenced by the first.
+Then a tree of children render elements can be defined, in order to alter the way documents are generated depending in their level in the hierarchy.
+The children render elements might be useful even if this parameter is set to false in order to compute relative links to external documents.
+</xs:documentation>
+				</xs:annotation></xs:attribute>
+			<xs:attribute name="userpass" type="xs:string" use="optional" >
+				<xs:annotation>
+					<xs:documentation>The user password. If defined, it will be required to open the document.</xs:documentation>
+				</xs:annotation></xs:attribute>
+			<xs:attribute name="ownerpass" type="xs:string" use="optional" >
+				<xs:annotation>
+					<xs:documentation>The owner password to secure the document. If not defined but some security options are activated, a dummy one will be automatically generated.</xs:documentation>
+				</xs:annotation></xs:attribute>
+			<xs:attribute name="noprint" type="xs:boolean" use="optional" default="false" >
+				<xs:annotation>
+					<xs:documentation>Restrict the ability to print the document.</xs:documentation>
+				</xs:annotation></xs:attribute>
+			<xs:attribute name="nocopy" type="xs:boolean" use="optional" default="false" >
+				<xs:annotation>
+					<xs:documentation>Restrict the ability to copy the document.</xs:documentation>
+				</xs:annotation></xs:attribute>
+			<xs:attribute name="noedit" type="xs:boolean" use="optional" default="false" >
+				<xs:annotation>
+					<xs:documentation>Restrict the ability to edit the document.</xs:documentation>
+				</xs:annotation></xs:attribute>
+			<xs:attribute name="noannot" type="xs:boolean" use="optional" default="false" >
+				<xs:annotation>
+					<xs:documentation>Restrict the ability to add annotations to the document.</xs:documentation>
+				</xs:annotation></xs:attribute>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="param">
+		<xs:complexType>
+			<xs:attribute name="name" use="required" type="xs:string" />
+			<xs:attribute name="value" use="required" type="xs:string" />
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

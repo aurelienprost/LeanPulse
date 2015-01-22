@@ -1,0 +1,12 @@
+javaclasspath(sydProjectDir + '\src\core\lib\syd-core.jar');
+javaclasspath(sydProjectDir + '\bin\syd-scilab.jar');
+javaclasspath(sydProjectDir + '\bin\test-core');
+javaclasspath(sydProjectDir + '\test\lib\junit\hamcrest-core-1.1.jar');
+javaclasspath(sydProjectDir + '\test\lib\junit\junit.jar');
+javaclasspath(sydProjectDir + '\test\lib\ant\ant.jar');
+javaclasspath(sydProjectDir + '\test\lib\ant\ant-launcher.jar');
+javaclasspath(sydProjectDir + '\test\lib\ant\ant-junit.jar');
+xcos();
+runner = jnewInstance('com.leanpulse.syd.test.AntRunner', sydProjectDir + '\test\scilab\material\testScilab.xml');
+runner.execute();
+quit;

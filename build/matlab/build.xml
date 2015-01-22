@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ Ant project to debug and build the SyD setup for Matlab.
+ 
+ *************************************************************************************************
+ *************************           !!!   PREREQUISITES   !!!           *************************
+ *************************************************************************************************
+ Required software:
+ 	- LibreOffice (http://www.libreoffice.org/) to automatically convert the documentation to PDF.
+ 		The executable "soffice" must be in your paths.
+ 	- NSIS (http://nsis.sourceforge.net/) to generate the Windows installer.
+ 		The executbale "makensis" must be in your paths.
+ 	- At least one install of Matlab >= R2007b.
+ Required configuration:
+ 	- The property "matlab.installs.path" must be set in the Ant runtime properties in the Eclipse
+ 		preferences window to indicate where the various installs of Matlab can be found (a common
+ 		value is "C:/Program Files/MATLAB").
+ *************************************************************************************************
+ 
+ Copyright (c) 2014 LeanPulse. All rights reserved.
+ 
+ Author: Aurélien PROST (a.prost@leanpulse.com)
+-->
+<project name="SyD Matlab Build" basedir="../.." default="matlab-setup">
+	
+	<!-- Import core build script. -->
+	<import file="${basedir}/build/core/build.xml"/>
+	
+	<!-- Load matlab properties. -->
+	<property file="${basedir}/build/matlab/build.properties"/>
+	
+	<!-- Define Matlab source directory and library. -->
+	<property name="src.matlab.dir" value="${src.dir}/matlab" />
+	<property name="syd.lib.matlab" location="${bin.dir}/syd-matlab.jar" />
+	
+	
+	<!-- Prepare debug on Matlab. -->
+	<target name="matlab-debug-prepare" depends="clean-debug">
+		<mkdir dir="${debug.dir}"/>
+		<copy todir="${debug.dir}">
+			<fileset dir="${src.matlab.dir}/demos"/>
+		</copy>
+	</target>
+	
+	<!-- Macro to start a Matlab sesion with SyD running in debug mode. -->
+	<!-- The launcher "SyD-matlab-attach-debugger" can be used to attach the debugger to the Matlab JVM. -->
+	<macrodef name="matlab-debug">
+		<attribute name="install"/>
+		<sequential>
+			<exec executable="${matlab.installs.path}/@{install}/bin/matlab.exe" dir="${debug.dir}">
+				<arg value="-r"/>
+				<arg value="addpath('${src.matlab.dir}');
+					javaaddpath('${syd.lib.core}');
+					javaaddpath('${syd.lib.matlab}');
+					open('${matlab.demos.root}');"/>
+				<arg value="-jdb"/>
+			</exec>
+		</sequential>
+	</macrodef>
+	
+	<!-- Debug SyD on Matlab R2007b. -->
+	<target name="matlab-debug-r2007b" depends="matlab-debug-prepare" description="Debug SyD on Matlab R2007b">
+		<matlab-debug install="R2007b"/>
+	</target>
+	
+	<!-- Debug SyD on Matlab R2010bSP2. -->
+	<target name="matlab-debug-r2010bSP2" depends="matlab-debug-prepare" description="Debug SyD on Matlab R2010bSP2">
+		<matlab-debug install="R2010bSP2"/>
+	</target>
+	
+	<!-- Debug SyD on Matlab R2011b. -->
+	<target name="matlab-debug-r2011b" depends="matlab-debug-prepare" description="Debug SyD on Matlab R2011b">
+		<matlab-debug install="R2011b"/>
+	</target>
+	
+	<!-- Debug SyD on Matlab R2012b. -->
+	<target name="matlab-debug-r2012b" depends="matlab-debug-prepare" description="Debug SyD on Matlab R2012b">
+		<matlab-debug install="R2012b"/>
+	</target>
+	
+	<!-- Debug SyD on Matlab R2013b. -->
+	<target name="matlab-debug-r2013b" depends="matlab-debug-prepare" description="Debug SyD on Matlab R2013b">
+		<matlab-debug install="R2013b"/>
+	</target>
+	
+	<!-- Debug SyD on Matlab R2014b. -->
+	<target name="matlab-debug-r2014b" depends="matlab-debug-prepare" description="Debug SyD on Matlab R2014b">
+		<matlab-debug install="R2014b"/>
+	</target>
+	
+	
+	<!-- Copy the Matlab scripts from the src to the dist directory. -->
+	<target name="matlab-dist-scripts" description="Copy and encode Matlab scripts">
+		<mkdir dir="${dist.app.dir}/private"/>
+		
+		<!-- Copy Matlab scripts. -->
+		<copy todir="${dist.app.dir}">
+			<fileset dir="${src.matlab.dir}">
+				<include name="*.m"/>
+				<include name="private/*.m"/>
+			</fileset>
+		</copy>
+		
+		<!-- Set the right toobox version. -->
+		<replace file="${dist.app.dir}/Contents.m">
+			<replacefilter token="@sydver@" value="${sydver}"/>
+			<replacefilter token="@syddate@" value="${syddate}"/>
+		</replace>
+		
+		<!-- Copy and convert documentation files. -->
+		<copy todir="${dist.app.dir}" preservelastmodified="true">
+			<fileset dir="${src.matlab.dir}/docs">
+				<exclude name="*.odt"/>
+			</fileset>
+		</copy>
+		<apply executable="soffice" parallel="false">
+			<arg value="-headless"/>
+			<arg value="-convert-to"/>
+			<arg value="pdf"/>
+			<arg value="-outdir"/>
+			<arg path="${dist.app.dir}"/>
+			<srcfile/>
+			<mapper type="glob" from="*.odt" to="${dist.app.dir}/*.pdf"/>
+			<fileset dir="${src.matlab.dir}/docs" includes="*.odt"/>
+		</apply>
+		
+	</target>
+	
+	
+	<!-- Convert demo models to R2007b to ensure Matlab versions compatibilty. -->
+	<target name="matlab-convert-demos" if="matlab.demos.conv" description="Convert demo models to R2007b">
+		
+		<!-- Save the demo models from the src dir to the dist dir as R2007b. -->
+		<echo taskname="matlab" message="Converting demo models to R2007b" level="info"/>
+		<mkdir dir="${dist.app.dir}/demos"/>
+		<exec executable="matlab" dir="${dist.app.dir}">
+			<arg value="-nosplash"/>
+			<arg value="-minimize"/>
+			<arg value="-r"/>
+			<arg value="addpath('${basedir}/build/matlab');
+				convertModels('${src.matlab.dir}/demos','${dist.app.dir}/demos');
+				quit;"/>
+		</exec>
+		
+		<!-- Force to save again the models with R2007B to clean them up and avoid warning messages on load. -->
+		<exec executable="${matlab.installs.path}/R2007b/bin/win32/matlab.exe" dir="${dist.app.dir}">
+			<arg value="-nosplash"/>
+			<arg value="-minimize"/>
+			<arg value="-r"/>
+			<arg value="addpath('${build.dir}/build/matlab');
+				saveModels('${dist.app.dir}/demos');
+				quit;"/>
+		</exec>
+		
+		<copy todir="${dist.app.dir}/demos" overwrite="true" failonerror="false">
+			<fileset dir="${src.matlab.dir}/demos">
+				<exclude name="*.mdl"/>
+			</fileset>
+		</copy>
+		
+	</target>
+	
+	
+	<!-- Copy demo models to dist folder without any conversion -->
+	<target name="matlab-dist-demos" unless="matlab.demos.conv">
+		<mkdir dir="${dist.app.dir}/demos"/>
+		<copy todir="${dist.app.dir}/demos">
+			<fileset dir="${src.matlab.dir}/demos" />
+		</copy>
+	</target>
+	
+	
+	<!-- Main task to distribute Matlab-relative elements -->
+	<target name="matlab-dist" depends="matlab-dist-scripts,matlab-convert-demos,matlab-dist-demos" description="Main task to distribute Matlab-relative elements">
+		<copy todir="${dist.app.dir}/lib" file="${syd.lib.matlab}"/>
+	</target>
+	
+	
+	<!-- Build the SyD installer. -->
+	<target name="matlab-setup" depends="clean-dist,core-dist,matlab-dist" description="Build the SyD installer for Matlab">
+		<exec executable="makensis">
+			<arg value="/DPROD_NAME=SyD"/>
+			<arg value="/DPROD_VERSION=${sydver}"/>
+			<arg value="/DPROD_TITLE=LeanPulse System Document Generator (Syd) v${sydver}"/>
+			<arg value="/DDEMO_MDL=${matlab.demos.root}"/>
+			<arg value="/DCUSTOMER=${customer}"/>
+			<arg value="${basedir}/build/matlab/install.nsi"/>
+		</exec>
+	</target>
+	
+
+</project>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ Ant project to test the core of SyD.
+ 
+ Copyright (c) 2011 LeanPulse. All rights reserved.
+ 
+ Author: Aurélien PROST (a.prost@leanpulse.com)
+-->
+<project name="SyD Core Test" basedir="../.." default="test-core">
+	
+	<!-- Import core build script. -->
+	<import file="${basedir}/build/core/build.xml"/>
+	
+	<!-- Define common directories. -->
+	<property name="test.core.dir" location="${test.dir}/core" />
+	<property name="test.core.material.dir" location="${test.core.dir}/material" />
+	<property name="test.core.results.dir" location="${test.core.dir}/#results" />
+	
+	<!-- Clean the results and generated files for the tests of the core of SyD. -->
+	<target name="clean-test-core">
+		<delete dir="${test.core.material.dir}" includes="*.pdf"/>
+		<delete dir="${test.core.results.dir}"/>
+	</target>
+	
+	<!-- Test the core of SyD. -->
+	<target name="test-core" depends="clean-test-core">
+		<mkdir dir="${test.core.results.dir}"/>
+		<junit fork="true" printsummary="on" haltonfailure="false" dir="${test.core.material.dir}">
+			<classpath>
+				<pathelement location="${syd.lib.core}" />
+				<pathelement location="${bin.dir}/test-core" />
+				<fileset dir="${test.dir}/lib/junit">
+					<include name="*.jar"/>
+				</fileset>
+			</classpath>
+			<env key="CLASSPATH" path="${src.core.dir}/lib/syd-rmrender.jar"/>
+			<formatter type="xml" />
+			<batchtest todir="${test.core.results.dir}">
+				<fileset dir="${test.core.dir}/junit" includes="**/Test*.java"/>
+			</batchtest>
+		</junit>
+	</target>
+
+</project>

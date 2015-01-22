@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ Ant project to test the Scilab version of SyD.
+ 
+ *************************************************************************************************
+ *************************           !!!   PREREQUISITES   !!!           *************************
+ *************************************************************************************************
+ Required software:
+ 	- An install of Scilab, only the version 5.3.1 of the software has been tested with SyD and
+ 		the Java extension to add a menu in Xcos seems to have been removed with later versions.
+ Required configuration:
+ 	- The property "scilab.install.path" must be set in the Ant runtime properties in the Eclipse
+ 		preferences window to indicate where the install of Scilab can be found (a common
+ 		value is "C:/Program Files/scilab-5.3.1").
+ *************************************************************************************************
+ 
+ Copyright (c) 2014 LeanPulse. All rights reserved.
+ 
+ Author: Aurélien PROST (a.prost@leanpulse.com)
+-->
+<project name="SyD Scilab Test" basedir="../.." default="test-scilab">
+	
+	<!-- Import matlab build script. -->
+	<import file="${basedir}/build/scilab/build.xml"/>
+	
+	<!-- Define common directories. -->
+	<property name="test.scilab.dir" location="${test.dir}/scilab" />
+	<property name="test.scilab.material.dir" location="${test.scilab.dir}/material" />
+	<property name="test.scilab.results.dir" location="${test.scilab.dir}/#results" />
+	
+	<!-- Clean the results and generated files for the tests of SyD running on Scilab. -->
+	<target name="clean-test-scilab">
+		<delete dir="${test.scilab.material.dir}/single" includes="*.xml"/>
+		<delete dir="${test.scilab.material.dir}" includes="**/*.pdf"/>
+		<delete dir="${test.scilab.results.dir}"/>
+	</target>
+	
+	<!-- Test SyD running on Scilab. -->
+	<target name="test-scilab" depends="clean-test-scilab">
+		<exec executable="${scilab.install.path}/bin/WScilex.exe" dir="${test.scilab.material.dir}">
+			<arg value="-nb"/>
+			<arg value="-e"/>
+			<arg value="sydProjectDir = '${basedir}';
+				exec('${basedir}' + '\test\scilab\material\testScilab.sci', 1);"/>
+		</exec>
+	</target>
+
+</project>

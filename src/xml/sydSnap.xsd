@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.leanpulse.com/schemas/syd/2011/core"
+		xmlns:syd="http://www.leanpulse.com/schemas/syd/2011/core"
+		xmlns:svg="http://www.w3.org/2000/svg"
+		xmlns:w="http://schemas.microsoft.com/office/word/2003/wordml"
+		elementFormDefault="qualified">
+    <xs:element name="model" type="syd:slElementType" />
+    <xs:element name="system" type="syd:slElementType" />
+    <xs:element name="chart" type="syd:sfElementType" />
+    <xs:element name="state" type="syd:sfElementType" />
+    <xs:element name="box" type="syd:sfElementType" />
+    <xs:element name="function" type="syd:sfElementType" />
+    <xs:complexType name="sfElementType">
+    	<xs:sequence>
+    		<xs:element ref="syd:extradata" minOccurs="0" maxOccurs="1" />
+    		<xs:element ref="syd:snapshot" minOccurs="1" maxOccurs="1" />
+    		<xs:element ref="syd:state" minOccurs="0" maxOccurs="unbounded" />
+    		<xs:element ref="syd:box" minOccurs="0" maxOccurs="unbounded" />
+    		<xs:element ref="syd:function" minOccurs="0" maxOccurs="unbounded" />
+    		<xs:element ref="syd:truthtable" minOccurs="0" maxOccurs="unbounded" />
+    		<xs:element ref="syd:mfunction" minOccurs="0" maxOccurs="unbounded" />
+    	</xs:sequence>
+    	<xs:attribute name="path" type="xs:string" use="required" />
+    </xs:complexType>
+    <xs:complexType name="slElementType">
+    	<xs:sequence>
+    		<xs:element ref="syd:extradata" minOccurs="0" maxOccurs="1" />
+    		<xs:element ref="syd:snapshot" minOccurs="1" maxOccurs="1" />
+    		<xs:element ref="syd:comment" minOccurs="0" maxOccurs="unbounded" />
+    		<xs:element ref="syd:system" minOccurs="0" maxOccurs="unbounded" />
+    		<xs:element ref="syd:modelref" minOccurs="0" maxOccurs="unbounded" />
+    		<xs:element ref="syd:chart" minOccurs="0" maxOccurs="unbounded" />
+    		<xs:element ref="syd:truthtable" minOccurs="0" maxOccurs="unbounded" />
+    		<xs:element ref="syd:mfunction" minOccurs="0" maxOccurs="unbounded" />
+    	</xs:sequence>
+    	<xs:attribute name="path" type="xs:string" use="required" />
+    	<xs:attribute name="mdlversion" type="xs:string" use="optional" />
+    	<xs:attribute name="mdldep" type="xs:string" use="optional" />
+    </xs:complexType>
+    <xs:element name="modelref">
+    	<xs:complexType>
+    		<xs:sequence>
+    			<xs:element ref="syd:extradata" minOccurs="0" maxOccurs="1" />
+    		</xs:sequence>
+    		<xs:attribute name="path" type="xs:string" use="required"/>
+			<xs:attribute name="file" type="xs:string" use="required"/>
+    	</xs:complexType>
+    </xs:element>
+    <xs:element name="truthtable">
+    	<xs:complexType>
+    		<xs:sequence>
+    			<xs:element ref="syd:extradata" minOccurs="0" maxOccurs="1" />
+    			<xs:element name="condition" minOccurs="1" maxOccurs="unbounded">
+    				<xs:complexType>
+    					<xs:sequence>
+    						<xs:element name="col" type="xs:string" minOccurs="0" maxOccurs="unbounded" />
+    					</xs:sequence>
+    				</xs:complexType>
+    			</xs:element>
+    			<xs:element name="action" minOccurs="1" maxOccurs="unbounded">
+    				<xs:complexType>
+    					<xs:sequence>
+    						<xs:element name="col" type="xs:string" minOccurs="0" maxOccurs="unbounded" />
+    					</xs:sequence>
+    				</xs:complexType>
+    			</xs:element>
+    		</xs:sequence>
+    		<xs:attribute name="path" type="xs:string" use="required"/>
+    	</xs:complexType>
+    </xs:element>
+    <xs:element name="mfunction">
+    	<xs:complexType>
+    		<xs:sequence>
+    			<xs:element ref="syd:extradata" minOccurs="0" maxOccurs="1" />
+    			<xs:element name="script" type="xs:string" minOccurs="1" maxOccurs="1" />
+    		</xs:sequence>
+    		<xs:attribute name="path" type="xs:string" use="required"/>
+    	</xs:complexType>
+    </xs:element>
+    <xs:element name="snapshot">
+    	<xs:complexType>
+    		<xs:sequence>
+    			<xs:element ref="svg:svg" minOccurs="1" maxOccurs="1" />
+    		</xs:sequence>
+    	</xs:complexType>
+    </xs:element>
+    <xs:element name="comment">
+    	<xs:complexType>
+    		<xs:sequence>
+    			<xs:choice minOccurs="1" maxOccurs="1" >
+    				<xs:element name="text" type="xs:string" />
+    				<xs:element ref="w:wordDocument" />
+    			</xs:choice>
+    		</xs:sequence>
+    		<xs:attribute name="type" use="required">
+    			<xs:simpleType>
+    				<xs:restriction base="xs:string">
+    					<xs:enumeration value="text" />
+    					<xs:enumeration value="wordml" />
+    				</xs:restriction>
+    			</xs:simpleType>
+    		</xs:attribute>
+    	</xs:complexType>
+    </xs:element>
+    <xs:element name="extradata">
+    	<xs:complexType>
+    		<xs:sequence>
+    			<xs:any />
+    		</xs:sequence>
+    		<xs:anyAttribute />
+    	</xs:complexType>
+    </xs:element>
+
+</xs:schema>

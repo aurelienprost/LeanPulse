@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pro:profiles xmlns:pro="http://www.leanpulse.com/schemas/syd/2011/profiles">
+	<pro:renderparam name="security" value="2"/>
+	<pro:profile id="Portrait" name="Portrait" shortcut="CTRL+1">
+		<!-- Profiles accept on optional "snap" child element to specify how SyD will navigate through model subsystems  -->
+		<!-- in order to extract the data.                                                                               -->
+		<!-- By setting the "followlinks" or "lookundermasks" attributes to true, SyD can automatically look under masks -->
+		<!-- or follow library links (default is false for both).                                                        -->
+		<!-- If one of these attributes is set to true, "ReferenceBlock" or "MaskType" snap parameters can be added to   -->
+		<!-- respectively only follow links referencing a given list of library blocks or only look under a given list   -->
+		<!-- of mask types.                                                                                              -->
+		<!-- Please report to the example below to learn the syntax:
+		<pro:snap followlinks="true" lookundermasks="true">
+			<pro:snapparam name="ReferenceBlock" value="&quot;MyLibray/My Block&quot; &quot;MyLibray/My Block\n with line break&quot;"/>
+			<pro:snapparam name="MaskType" value="&quot;MyFirstMaskToLookUnder&quot; &quot;MySecondMaskToLookUnder&quot;"/>
+		</pro:snap> -->
+		<pro:render format="pdf" outdir="." action="open"/>
+	</pro:profile>
+	<pro:profile id="Landscape" name="Landscape and Tiled Printing" shortcut="CTRL+2">
+		<pro:render format="pdf" outdir="." suffix="_landscape" action="open">
+			<pro:renderparam name="pageheight" value="210"/>
+			<pro:renderparam name="pagewidth" value="297"/>
+			<pro:renderparam name="dico-font-size-prop" value="100%"/>
+			<pro:renderparam name="printtiles" value="true"/>
+		</pro:render>
+	</pro:profile>
+	<pro:profile id="LowSec" name="Low security" shortcut="CTRL+3">
+		<pro:render format="pdf" outdir="." suffix="_lsec" action="open">
+			<pro:renderparam name="security" value="0"/>
+		</pro:render>
+	</pro:profile>
+	<pro:profile id="AllSec" name="All security" shortcut="CTRL+4">
+		<pro:render format="pdf" outdir="." suffix="_lsec" action="open">
+			<pro:renderparam name="security" value="0"/>
+		</pro:render>
+		<pro:render format="pdf" outdir="." suffix="_msec" action="open">
+			<pro:renderparam name="security" value="1"/>
+		</pro:render>
+		<pro:render format="pdf" outdir="." suffix="_hsec" action="open"/>
+	</pro:profile>
+	<pro:profile id="Hierarchy" name="Hierarchy" shortcut="CTRL+5">
+		<pro:render format="pdf" outdir="." action="open" gendep="true">
+			<pro:render format="pdf" outdir="." gendep="true"/>
+		</pro:render>
+	</pro:profile>
+	<pro:profile id="HierarchyEmbed" name="Hierarchy (Single Document)" shortcut="CTRL+6">
+		<pro:render format="pdf" outdir="." suffix="_hierarchy" action="open" gendep="embed"/>
+	</pro:profile>
+	<pro:profile id="HierarchyLand" name="Hierarchy (Style variants)" shortcut="CTRL+7">
+		<pro:render format="pdf" outdir="." suffix="_landscape" action="open" gendep="true">
+			<pro:renderparam name="pageheight" value="210"/>
+			<pro:renderparam name="pagewidth" value="297"/>
+			<pro:renderparam name="dico-font-size-prop" value="100%"/>
+			<pro:render format="pdf" outdir="." gendep="true">
+				<pro:renderparam name="pageheight" value="297"/>
+				<pro:renderparam name="pagewidth" value="210"/>
+				<pro:renderparam name="dico-font-size-prop" value="70%"/>
+			</pro:render>
+		</pro:render>
+	</pro:profile>
+	<pro:profile id="HierarchyDir" name="Hierachy (Output to cur dir)" shortcut="CTRL+8">
+		<pro:render format="pdf" outdir="." relto="curdir" action="open" gendep="true">
+			<pro:render format="pdf" outdir="./pdf" relto="parent" gendep="true"/>
+		</pro:render>
+	</pro:profile>
+</pro:profiles>

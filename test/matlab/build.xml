@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ Ant project to test the Matlab version of SyD.
+ 
+  *************************************************************************************************
+ *************************           !!!   PREREQUISITES   !!!           *************************
+ *************************************************************************************************
+ Required software:
+ 	- At least one install of Matlab >= R2007b on which to perform the unit tests.
+ Required configuration:
+ 	- The property "matlab.installs.path" must be set in the Ant runtime properties in the Eclipse
+ 		preferences window to indicate where the various installs of Matlab can be found (a common
+ 		value is "C:/Program Files/MATLAB").
+ *************************************************************************************************
+ 
+ Copyright (c) 2014 LeanPulse. All rights reserved.
+ 
+ Author: Aurélien PROST (a.prost@leanpulse.com)
+-->
+<project name="SyD Matlab Test" basedir="../.." default="test-matlab">
+	
+	<!-- Import matlab build script. -->
+	<import file="${basedir}/build/matlab/build.xml"/>
+	
+	<!-- Define common directories. -->
+	<property name="test.matlab.dir" location="${test.dir}/matlab" />
+	<property name="test.matlab.material.dir" location="${test.matlab.dir}/material" />
+	<property name="test.matlab.results.dir" location="${test.matlab.dir}/#results" />
+	
+	<!-- Clean the results and generated files for the tests of SyD running on Matlab. -->
+	<target name="clean-test-matlab">
+		<delete dir="${test.matlab.material.dir}" includeemptydirs="true" includes="#*/**"/>
+		<delete dir="${test.matlab.material.dir}/single/demo" includes="*.xml"/>
+		<delete dir="${test.matlab.material.dir}" includes="**/*.pdf"/>
+		<delete dir="${test.matlab.results.dir}"/>
+	</target>
+	
+	<!-- Macro to execute the unit tests on a Matlab install. -->
+	<macrodef name="matlab-test">
+		<attribute name="install"/>
+		<sequential>
+			<!-- To correctly perform the JUnit tests in the Matlab JVM, we must make Matlab use the correct libraries. -->
+			<!-- The code below reconstructs a modified classpath.txt for this purpose. -->
+			<mkdir dir="${test.matlab.material.dir}/#startdir@{install}"/>
+			<copy todir="${test.matlab.material.dir}/#startdir@{install}" file="${matlab.installs.path}/@{install}/toolbox/local/classpath.txt"/>
+			<replace file="${test.matlab.material.dir}/#startdir@{install}/classpath.txt">
+				<replacefilter token="$matlabroot/java/jarext/ant.jar" value="## $matlabroot/java/jarext/ant.jar"/>
+				<replacefilter token="$matlabroot/java/jarext/junit.jar" value="## $matlabroot/java/jarext/junit.jar"/>
+			</replace>
+			<echo file="${test.matlab.material.dir}/#startdir@{install}/classpath.txt" append="true">${test.dir}\lib\ant\ant.jar
+${test.dir}\lib\ant\ant-launcher.jar
+${test.dir}\lib\ant\ant-junit.jar
+${test.dir}\lib\junit\junit.jar
+${test.dir}\lib\junit\hamcrest-core-1.1.jar</echo>
+			<!-- Matlab is then started to execute the unit tests. -->
+			<exec executable="${matlab.installs.path}/@{install}/bin/win32/matlab.exe" dir="${test.matlab.material.dir}/#startdir@{install}">
+				<arg value="-r"/>
+				<arg value="addpath('${src.matlab.dir}');
+					javaaddpath('${syd.lib.core}');
+					javaaddpath('${syd.lib.matlab}');
+					javaaddpath('${bin.dir}/test-core');
+					runner = com.leanpulse.syd.test.AntRunner('${test.matlab.material.dir}/testMatlab.xml','${test.matlab.results.dir}/@{install}');
+					runner.execute();
+					quit;"/>
+			</exec>
+		</sequential>
+	</macrodef>
+	
+	<!-- Test SyD running on Matlab. -->
+	<target name="test-matlab" depends="clean-test-matlab">
+		<matlab-test install="R2007b"/>
+		<matlab-test install="R2010bSP2"/>
+		<matlab-test install="R2011b"/>
+		<matlab-test install="R2012b"/>
+		<matlab-test install="R2013b"/>
+		<matlab-test install="R2014b"/>
+	</target>
+
+</project>

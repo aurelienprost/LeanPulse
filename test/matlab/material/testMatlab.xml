@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="SyD" basedir="../../.." default="test">
+	
+	<target name="test">
+		
+		<mkdir dir="${results.dir}"/>
+		<junit printsummary="on" haltonfailure="false" showoutput="true">
+			<classpath>
+				<pathelement location="src/core/lib/syd-core.jar" />
+				<pathelement location="bin/syd-matlab.jar" />
+				<pathelement location="bin/test-core" />
+				<pathelement location="bin/test-matlab" />
+			</classpath>
+			<formatter type="xml" />
+			<batchtest todir="${results.dir}">
+				<fileset dir="test/matlab/junit" includes="**/Test*.java"/>
+			</batchtest>
+		</junit>
+	
+	</target>
+
+</project>

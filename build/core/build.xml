@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ This Ant project implements specific targets to build the core sources and javadocs.
+ 
+ *************************************************************************************************
+ *************************           !!!   PREREQUISITES   !!!           *************************
+ *************************************************************************************************
+ Required software:
+ 	- LibreOffice (libreoffice.org) to automatically convert the documentation to PDF.
+ 		The executable "soffice" must be in your paths.
+ *************************************************************************************************
+ 
+ Copyright (c) 2014 LeanPulse. All rights reserved.
+ 
+ Author: Aurélien PROST (a.prost@leanpulse.com)
+-->
+<project name="SyD Core Build" basedir="../..">
+	
+	<!-- Load core properties. -->
+	<property file="${basedir}/build/core/build.properties"/>
+	
+	<!-- Define common directories. -->
+	<property name="src.dir" location="${basedir}/src" />
+	<property name="src.core.dir" location="${basedir}/src/core" />
+	<property name="bin.dir" location="${basedir}/bin" />
+	<property name="test.dir" location="${basedir}/test" />
+	<property name="debug.dir" location="${basedir}/#debug" />
+	
+	<property name="dist.dir" location="${basedir}/#dist" />
+	<property name="dist.app.dir" location="${dist.dir}/app" />
+	
+	<property name="doc.api.dir" location="${dist.dir}/doc/api" />
+	
+	
+	<!-- Define core library. -->
+	<property name="syd.lib.core" location="${src.core.dir}/lib/syd-core.jar" />
+	
+	<!-- Clean the binaries. -->
+	<target name="clean-bin" description="Clean the binaries">
+		<eclipse.incrementalBuild project="SyD" kind="clean"/>
+	</target>
+	
+	<!-- Clean the distribution directory. -->
+	<target name="clean-dist" description="Clean the distribution directory">
+		<delete dir="${dist.dir}"/>
+	</target>
+	
+	<!-- Clean the debug directory. -->
+	<target name="clean-debug" description="Clean the debug directory">
+		<delete dir="${debug.dir}"/>
+	</target>
+	
+	
+	<!-- Set tool version in java sources. -->
+	<target name="core-set-ver">
+		<replaceregexp match='\/\*@SYDVER@\*\/".*"\/\*@SYDVER@\*\/' replace='/*@SYDVER@*/"${sydver}"/*@SYDVER@*/' >
+			<fileset dir="${src.core.dir}">
+			    <include name="java-genserver/com/leanpulse/syd/remote/internal/EmbedFopRenderer.java"/>
+			</fileset>
+		</replaceregexp>
+		<eclipse.refreshLocal resource="SyD/src/core" depth="infinite"/>
+	</target>
+	
+	
+	<!-- Copy the stylesheets. -->
+	<target name="core-dist-styles" description="Copy the stylesheets">
+		<mkdir dir="${dist.app.dir}/styles"/>
+		<copy todir="${dist.app.dir}/styles">
+			<fileset dir="${src.dir}/core/styles" excludes="latexml/,wordml/"/>
+		</copy>
+		<jar destfile="${dist.app.dir}/styles/comments.zxs">
+			<fileset dir="${src.dir}/core/styles" includes="latexml/,wordml/"/>
+		</jar>
+		<replace dir="${dist.app.dir}/styles">
+			<include name="*.xsl"/>
+			<replacefilter token='href="../../../core/styles/' value='href="'/>
+			<replacefilter token='href="wordml/wordml2fo.xsl"' value='href="zxs:file:comments.zxs!/wordml/wordml2fo.xsl"'/>
+			<replacefilter token='href="latexml/latexml2fo.xsl"' value='href="zxs:file:comments.zxs!/latexml/latexml2fo.xsl"'/>
+		</replace>
+	</target>
+	
+	
+	<!-- Copy and build all core sources files to the distribution directory. -->
+	<target name="core-dist" depends="core-set-ver,core-dist-styles" description="Copy and build all core sources files to the distribution directory">
+		<copy todir="${dist.app.dir}">
+			<fileset dir="${src.core.dir}">
+				<exclude name="docs/**"/>
+				<exclude name="java-*/**"/>
+				<exclude name="styles/**"/>
+				<exclude name="license.dat"/>
+			</fileset>
+		</copy>
+		<copy todir="${dist.app.dir}">
+			<fileset dir="${src.core.dir}/docs">
+				<exclude name="*.odt"/>
+			</fileset>
+		</copy>
+		<apply executable="soffice" parallel="false">
+			<arg value="-headless"/>
+			<arg value="-convert-to"/>
+			<arg value="pdf"/>
+			<arg value="-outdir"/>
+			<arg path="${dist.app.dir}"/>
+			<srcfile/>
+			<mapper type="glob" from="*.odt" to="${dist.app.dir}/*.pdf"/>
+			<fileset dir="${src.core.dir}/docs" includes="*.odt"/>
+		</apply>
+	</target>
+	
+	
+	<!-- Build the Java API Documentation. -->
+	<target name="doc-core" description="Build the JavaDoc">
+		<delete dir="${doc.api.dir}"/>
+		<javadoc packagenames="com.leanpulse.syd.api.*" access="public" sourcepath="${src.core.dir}/java-app" destdir="${doc.api.dir}"
+				windowtitle="System Document generator (SyD) API" overview="${src.core.dir}/java-app/overview.html"
+				header="&lt;em&gt;&lt;b&gt;LeanPulse&lt;br/&gt;SyD ${sydver}&lt;/b&gt;&lt;/em&gt;">
+			<doctitle><![CDATA[<h1>System Document generator (SyD) API</h1>]]></doctitle>
+			<bottom><![CDATA[
+				<font size=-1>
+					<a href="http://bugzilla.leanpulse.com/">Submit a bug or feature</a>
+					<br/>For further information on products, please visit the <a href="http://www.leanpulse.com/">LeanPulse website</a>.
+					If you have a technical question or to find out more on how LeanPulse can help you, contact the <a href="mailto:dev@leanpulse.com">LeanPulse development team</a>.
+					<p>Copyright &#169; 2011 LeanPulse. All Rights Reserved.</p>
+				</font>
+			]]></bottom>
+			<group title="System Documentation Generation" packages="com.leanpulse.syd.api" />
+			<group title="Progress Report" packages="com.leanpulse.syd.api.progress" />
+			<link href="http://download.oracle.com/javase/6/docs/api/" />
+		</javadoc>
+	</target>
+
+</project>

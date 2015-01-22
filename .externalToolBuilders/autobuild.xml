@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ Ant project implementing targets automatically called by the Eclipse
+ project builder on clean and build.
+ 
+ Copyright (c) 2011 LeanPulse. All rights reserved.
+ 
+ Author: Aurélien PROST (a.prost@leanpulse.com)
+-->
+<project name="SyD-auto" basedir="..">
+	
+	<!-- Delete jar files on clean -->
+	<target name="autoClean">
+		<delete file="src/core/lib/syd-core.jar"/>
+		<delete file="src/core/lib/syd-rmrender.jar"/>
+		<delete file="bin/syd-matlab.jar"/>
+		<delete file="bin/syd-scilab.jar"/>
+	</target>
+	
+	<!-- Package class files on build -->
+	<target name="autoBuild">
+		<jar destfile="src/core/lib/syd-core.jar">
+			<fileset dir="bin/core-app" excludes="**/*.html"/>
+		</jar>
+		<jar destfile="src/core/lib/syd-rmrender.jar">
+			<fileset dir="bin/core-app" excludes="**/*.html,com/leanpulse/syd/internal/**"/>
+			<fileset dir="bin/core-genserver"/>
+			<manifest>
+				<attribute name="Main-Class" value="com.leanpulse.syd.remote.internal.FopRendererServer"/>
+				<attribute name="Class-Path" value="fop-1.0.jar saxon9.jar saxon9-dom.jar jeuclid-core-3.1.9.jar jeuclid-fop-3.1.9.jar"/>
+			</manifest>
+		</jar>
+		<jar destfile="bin/syd-matlab.jar">
+			<fileset dir="bin/matlab" excludes="**/*.html"/>
+			<manifest>
+				<attribute name="Class-Path" value="syd-core.jar"/>
+			</manifest>
+		</jar>
+		<jar destfile="bin/syd-scilab.jar">
+			<fileset dir="bin/scilab" excludes="**/*.html"/>
+			<manifest>
+				<attribute name="Class-Path" value="syd-core.jar"/>
+			</manifest>
+		</jar>
+	</target>
+
+</project>

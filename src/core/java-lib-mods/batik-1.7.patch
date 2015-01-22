@@ -1,0 +1,54 @@
+--- org/apache/batik/transcoder/wmf/tosvg/WMFPainter.java	Wed Dec 26 21:17:46 2007
++++ org/apache/batik/transcoder/wmf/tosvg/WMFPainter.java	Fri Feb 03 09:30:52 2012
+@@ -574,8 +574,7 @@
+                         firstEffectivePaint = false;
+                         y += getVerticalAlignmentValue(layout, currentVertAlign);
+ 
+-                        drawString(flag, g2d,
+-                            getCharacterIterator(g2d, sr, wmfFont, currentHorizAlign),
++                        drawString(flag, g2d, sr,
+                             x, y, layout, wmfFont, currentHorizAlign);
+                         if (clipped) g2d.setClip(clip);
+                     } catch ( Exception e ) {
+@@ -602,8 +601,7 @@
+                         firstEffectivePaint = false;
+                         y += getVerticalAlignmentValue(layout, currentVertAlign);
+ 
+-                        drawString(-1, g2d,
+-                            getCharacterIterator(g2d, sr, wmfFont),
++                        drawString(-1, g2d, sr,
+                             x, y, layout, wmfFont, currentHorizAlign);
+                     } catch ( Exception e ) {
+                     }
+@@ -969,18 +967,18 @@
+      *  <p>The other characteristics of the text, deriving from the WMF Font, must have been
+      *  collected before to constitute the AttributedCharacterIterator.</p>
+      */
+-    private void drawString(int flag, Graphics2D g2d, AttributedCharacterIterator ati,
++    private void drawString(int flag, Graphics2D g2d, String sr,
+         float x, float y, TextLayout layout, WMFFont wmfFont, int align) {
+ 
+         if (wmfFont.escape == 0) {
+             if (flag != -1) fillTextBackground(-1, flag, g2d, x, y, 0, layout);
+             float width = (float)(layout.getBounds().getWidth());
+             if (align == WMFConstants.TA_CENTER) {
+-                g2d.drawString(ati, x-width/2, y);
++                g2d.drawString(sr, x-width/2, y);
+             } else if (align == WMFConstants.TA_RIGHT) {
+-                g2d.drawString(ati, x-width, y);
++                g2d.drawString(sr, x-width, y);
+             } else {
+-                g2d.drawString(ati, x, y);
++                g2d.drawString(sr, x, y);
+             }
+         } else {
+             AffineTransform tr = g2d.getTransform();
+@@ -1001,7 +999,7 @@
+             if (flag != -1) fillTextBackground(align, flag, g2d, x, y, width, layout);
+             Stroke _st = g2d.getStroke();
+             g2d.setStroke(textSolid);
+-            g2d.drawString(ati, x, y);
++            g2d.drawString(sr, x, y);
+             g2d.setStroke(_st);
+             g2d.setTransform(tr);
+         }

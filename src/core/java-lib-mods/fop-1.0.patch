@@ -1,0 +1,124 @@
+--- org/apache/fop/pdf/PDFFactory.java	Thu Jan 15 10:13:00 1970
++++ org/apache/fop/pdf/PDFFactory.java	Thu Jan 15 10:13:00 1970
+@@ -1076,6 +1076,10 @@
+             String filename = target.substring(0, index + 4);
+             String dest = target.substring(index + 10);
+             return getGoToPDFAction(filename, dest, -1, newWindow);
++        // Internal named destination
++        } else if (targetLo.startsWith("#")) {
++            String dest = target.substring(1);
++            return getGoToPDFAction(null, dest, -1, newWindow);
+         // None of the above? Default to URI:
+         } else {
+             return new PDFUri(target);
+@@ -1129,31 +1133,43 @@
+      *                  displayed in a new window
+      * @return the pdf goto remote object
+      */
+-    private PDFGoToRemote getGoToPDFAction(String file, String dest, int page, boolean newWindow) {
++    private PDFAction getGoToPDFAction(String file, String dest, int page, boolean newWindow) {
+         getDocument().getProfile().verifyActionAllowed();
+-        PDFFileSpec fileSpec = new PDFFileSpec(file);
+-        PDFFileSpec oldspec = getDocument().findFileSpec(fileSpec);
+-        if (oldspec == null) {
+-            getDocument().registerObject(fileSpec);
++        if (file == null) {
++            PDFGoTo gt = new PDFGoTo("-1");
++            gt.setNamedDestination(dest);
++            PDFGoTo oldgt = getDocument().findGoTo(gt);
++            if (oldgt == null) {
++                getDocument().registerObject(gt);
++            } else {
++                gt = oldgt;
++            }
++            return gt;
+         } else {
+-            fileSpec = oldspec;
+-        }
+-        PDFGoToRemote remote;
++            PDFFileSpec fileSpec = new PDFFileSpec(file);
++            PDFFileSpec oldspec = getDocument().findFileSpec(fileSpec);
++            if (oldspec == null) {
++                getDocument().registerObject(fileSpec);
++            } else {
++                fileSpec = oldspec;
++            }
++            PDFGoToRemote remote;
+ 
+-        if (dest == null && page == -1) {
+-            remote = new PDFGoToRemote(fileSpec, newWindow);
+-        } else if (dest != null) {
+-            remote = new PDFGoToRemote(fileSpec, dest, newWindow);
+-        } else {
+-            remote = new PDFGoToRemote(fileSpec, page, newWindow);
+-        }
+-        PDFGoToRemote oldremote = getDocument().findGoToRemote(remote);
+-        if (oldremote == null) {
+-            getDocument().registerObject(remote);
+-        } else {
+-            remote = oldremote;
++            if (dest == null && page == -1) {
++                remote = new PDFGoToRemote(fileSpec, newWindow);
++            } else if (dest != null) {
++                remote = new PDFGoToRemote(fileSpec, dest, newWindow);
++            } else {
++                remote = new PDFGoToRemote(fileSpec, page, newWindow);
++            }
++            PDFGoToRemote oldremote = getDocument().findGoToRemote(remote);
++            if (oldremote == null) {
++                getDocument().registerObject(remote);
++            } else {
++                remote = oldremote;
++            }
++            return remote;
+         }
+-        return remote;
+     }
+ 
+     /**
+--- org/apache/fop/pdf/PDFGoTo.java	Thu Jan 15 10:13:00 1970
++++ org/apache/fop/pdf/PDFGoTo.java	Thu Jan 15 10:13:00 1970
+@@ -35,6 +35,7 @@
+     private String destination = null;
+     private float xPosition = 0;
+     private float yPosition = 0;
++    private boolean hasNamedDestination = false;
+ 
+     /**
+      * create a /GoTo object.
+@@ -105,7 +106,16 @@
+      * @param dest the PDF destination string
+      */
+     public void setDestination(String dest) {
+-        destination = dest;
++        this.destination = dest;
++    }
++
++    /**
++     * Sets a named destination internal to the PDF.
++     * @param dest the internal named destination.
++     */
++    public void setNamedDestination(String dest) {
++        this.hasNamedDestination = true;
++        this.destination = dest;
+     }
+ 
+     /**
+@@ -125,6 +135,8 @@
+         if (destination == null) {
+             dest = "/D [" + this.pageReference + " /XYZ " + xPosition
+                           + " " + yPosition + " null]\n";
++        } else if (hasNamedDestination) {
++            dest = "/D (" + this.destination + ")\n";
+         } else {
+             dest = "/D [" + this.pageReference + " " + destination + "]\n";
+         }
+@@ -171,7 +183,7 @@
+                 return false;
+             }
+         } else {
+-            if (!destination.equals(gt.destination)) {
++            if (!(destination.equals(gt.destination) && gt.hasNamedDestination == hasNamedDestination)) {
+                 return false;
+             }
+         }

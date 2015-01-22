@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ Ant project to test SyD.
+ 
+ Copyright (c) 2011 LeanPulse. All rights reserved.
+ 
+ Author: Aurélien PROST (a.prost@leanpulse.com)
+-->
+<project name="SyD Test" basedir=".." default="test-all">
+	
+	<import file="${basedir}/test/core/build.xml"/>
+	<import file="${basedir}/test/matlab/build.xml"/>
+	<import file="${basedir}/test/scilab/build.xml"/>
+	
+	<property name="test.results.dir" location="${test.dir}/#results" />
+	<property name="doc.test.dir" location="${dist.dir}/doc/tests" />
+	
+	<target name="clean-test" depends="clean-test-core,clean-test-matlab,clean-test-scilab">
+		<delete dir="${test.results.dir}"/>
+	</target>
+	
+	<target name="test-all" depends="clean-test,test-core,test-matlab,test-scilab">
+		<mkdir dir="${test.results.dir}"/>
+		<junitreport todir="${test.results.dir}">
+			<fileset dir="${test.core.results.dir}" includes="TEST-*.xml" />
+			<fileset dir="${test.matlab.results.dir}" includes="**/TEST-*.xml" />
+			<fileset dir="${test.scilab.results.dir}" includes="TEST-*.xml" />
+			<report todir="${test.results.dir}" />
+		</junitreport>
+	</target>
+	
+	<target name="doc-test" depends="doc-core">
+		<delete dir="${doc.test.dir}"/>
+		<javadoc packagenames="com.leanpulse.syd.api"
+				sourcepath="${test.core.dir}/junit:${test.matlab.dir}/junit:${test.scilab.dir}/junit"
+				destdir="${doc.test.dir}" windowtitle="System Document generator (SyD) Unit Tests"
+				header="&lt;em&gt;&lt;b&gt;LeanPulse&lt;br/&gt;SyD ${sydver}&lt;/b&gt;&lt;/em&gt;"
+				overview="${test.core.dir}/junit/overview.html">
+			<doctitle><![CDATA[<h1>System Document generator (SyD) Unit Tests</h1>]]></doctitle>
+			<bottom><![CDATA[
+				<font size=-1>
+					<a href="http://bugzilla.leanpulse.com/">Submit a bug or feature</a>
+					<br/>For further information on products, please visit the <a href="http://www.leanpulse.com/">LeanPulse website</a>.
+					If you have a technical question or to find out more on how LeanPulse can help you, contact the <a href="mailto:dev@leanpulse.com">LeanPulse development team</a>.
+					<p>Copyright &#169; 2011 LeanPulse. All Rights Reserved.</p>
+				</font>
+			]]></bottom>
+			<classpath>
+				<fileset dir="${bin.dir}" includes="*.jar"/>
+				<fileset dir="${src.core.dir}/lib" includes="syd-core.jar,syd-rmrender.jar"/>
+				<fileset dir="${test.dir}/lib">
+					<include name="**/*.jar"/>
+				</fileset>
+			</classpath>
+			<group title="SyD API Tests" packages="com.leanpulse.syd.api" />
+			<link href="http://download.oracle.com/javase/6/docs/api/" />
+			<link href="../api/" />
+		</javadoc>
+	</target>
+
+</project>
